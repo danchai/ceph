@@ -1763,7 +1763,8 @@ void ReplicatedPG::do_backfill(OpRequestRef op)
   switch (m->op) {
   case MOSDPGBackfill::OP_BACKFILL_FINISH:
     {
-      assert(is_replica());
+      //XXX: No longer part of acting during backfill
+      //assert(is_replica());
       assert(cct->_conf->osd_kill_backfill_at != 1);
 
       MOSDPGBackfill *reply = new MOSDPGBackfill(MOSDPGBackfill::OP_BACKFILL_FINISH_ACK,
@@ -1782,7 +1783,8 @@ void ReplicatedPG::do_backfill(OpRequestRef op)
 
   case MOSDPGBackfill::OP_BACKFILL_PROGRESS:
     {
-      assert(is_replica());
+       //XXX: No longer part of acting during backfill
+      //assert(is_replica());
       assert(cct->_conf->osd_kill_backfill_at != 2);
 
       info.last_backfill = m->last_backfill;
@@ -5564,7 +5566,8 @@ void ReplicatedPG::sub_op_modify(OpRequestRef op)
   // sanity checks
   assert(m->map_epoch >= info.history.same_interval_since);
   assert(is_active());
-  assert(is_replica());
+  //XXX: No longer part of acting during backfill
+  //assert(is_replica());
   
   // we better not be missing this.
   assert(!pg_log.get_missing().is_missing(soid));
@@ -6843,6 +6846,7 @@ void ReplicatedPG::_committed_pushed_object(
     last_complete_ondisk = last_complete;
 
     if (last_complete_ondisk == info.last_update) {
+      //XXX: I assume backfill doesn't get here
       if (is_replica()) {
 	// we are fully up to date.  tell the primary!
 	osd->send_message_osd_cluster(get_primary(),
