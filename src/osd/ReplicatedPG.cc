@@ -7304,14 +7304,19 @@ void ReplicatedPG::apply_and_flush_repops(bool requeue)
   waiting_for_ack.clear();
 }
 
-void ReplicatedPG::on_flushed()
+void ReplicatedPG::on_flush_received()
 {
-  pair<hobject_t, ObjectContextRef> i;
-  while (object_contexts.get_next(i.first, &i)) {
-    derr << "on_flushed: object " << i.first << " obc still alive" << dendl;
+  assert(flushes_in_progress > 0);
+  if (--flushes_in_progress == 0) {
+    flushed = true;
+    pair<hobject_t, ObjectContextRef> i;
+    while (object_contexts.get_next(i.first, &i)) {
+      derr << "on_flush_received: object " << i.first << " obc still alive" << dendl;
+    }
+    assert(object_contexts.empty());
+    pgbackend->on_flushed();
+    requeue_ops(waiting_for_active);
   }
-  assert(object_contexts.empty());
-  pgbackend->on_flushed();
 }
 
 void ReplicatedPG::on_removal(ObjectStore::Transaction *t)

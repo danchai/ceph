@@ -1095,7 +1095,7 @@ public:
   void on_role_change();
   void on_change(ObjectStore::Transaction *t);
   void on_activate();
-  void on_flushed();
+  void on_flush_received();
   void on_removal(ObjectStore::Transaction *t);
   void on_shutdown();
 };
