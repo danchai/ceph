@@ -8153,6 +8153,11 @@ int ReplicatedPG::recover_backfill(
   }
   assert(!pending_backfill_updates.empty() ||
 	 new_last_backfill == last_backfill_started);
+  if (pending_backfill_updates.empty() &&
+      backfill_pos.is_max()) {
+    new_last_backfill = backfill_pos;
+    last_backfill_started = backfill_pos;
+  }
   if (new_last_backfill > pinfo.last_backfill) {
     pinfo.last_backfill = new_last_backfill;
     epoch_t e = get_osdmap()->get_epoch();
